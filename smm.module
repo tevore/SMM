@@ -1,0 +1,95 @@
+<?php
+
+/**
+ * @file
+ * A block module that displays a site-wide message to users
+ */
+ 
+ /**
+  * Implements hook_help
+  */
+ function smm_help($path, $arg) {
+  switch($path) {
+   case 'admin/help#smm':
+    return '<h3>' . t('Sitewide Maintenance Message') . '</h3>' . 
+		    '<p>' . t('This module allows a user to write a message for all users to view.') . '</p>' .
+			'<p>' . t('Additionally, a time can be set ( in minutes ) that deletes the message when the time has elapsed') . '</p>';
+    break;
+  }
+ }
+ 
+/**
+ * Implements hook_block_info
+ */
+function smm_block_info() {
+ $blocks['smm'] = array (
+  'info' => t('Site Maintenance Message'),
+  'cache' => DRUPAL_NO_CACHE,
+ );
+ 
+ return $blocks;
+}
+
+/**
+ * Implements hook_block_view
+ */
+function smm_block_view($delta = '') {
+ switch($delta) {
+  case 'smm':
+	$our_time = variable_get('sitewide_msg_expiry');
+	// Check if time has elapsed and clear block content values
+	// Additionally, clear cache so that anonymous users can see the changes
+	if($our_time <= time()) {
+		variable_set('sitewide_message', "");
+		variable_set('sitewide_msg_expiry', "");
+	} 
+   
+	$block['content'] = variable_get('sitewide_message');
+	cache_clear_all(NULL, 'cache_page', '*');
+    return $block;
+ }
+}
+
+/**
+ * Implements hook_menu
+ */
+function smm_menu() {
+ $items = array();
+ 
+ $items['admin/config/development/smm'] = array (
+  'title' => 'Site Maintenance Message',
+  'description' => 'Set up the message you want users to see across your site.',
+  'page callback' => 'drupal_get_form',
+  'page arguments' => array('smm_form'),
+  'access arguments' => array('access administration pages'),
+  'type' => MENU_NORMAL_ITEM,
+ );
+
+ return $items;
+}
+
+/**
+ * Page callback: Site Maintenance Message configs
+ *
+ * @see smm_menu()
+ */
+function smm_form($form, &$form_state) {
+
+ $form['sitewide_message'] = array (
+  '#type' => 'textfield',
+  '#title' => t('Message'),
+  '#description' => t('Message to display site-wide.'),
+  '#default_value' => variable_get('sitewide_message', "Enter your system message here!"),
+ );
+ 
+ $form['sitewide_msg_expiry'] = array (
+	'#type' => 'textfield',
+	'#title' => t('Time for expiration'),
+	'#description' => t('Set a time ( in minutes) for when the system message should expire.'),
+ );
+ 
+ variable_set('sitewide_msg_expiry', (variable_get('sitewide_msg_expiry') * 60) + time());
+ cache_clear_all(NULL, 'cache_page', '*');
+ return system_settings_form($form);
+ 
+}

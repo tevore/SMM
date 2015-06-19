@@ -1,0 +1,7 @@
+name = Site Maintenance Message
+description = A configurable message that will display to all users across the site
+core = 7.x
+version = 7.x-1.0
+package = WFS Custom
+;
+stylesheets[all][] = css/smm.css

@@ -1,0 +1,18 @@
+/* Stylesheet for smm module */
+
+#block-smm-smm {
+  color: #000;
+  border: 3px solid #000;
+  background: #e6e600;
+}
+
+#block-smm-smm .content {
+	margin: 0;
+	padding: 0;
+	text-align: center;
+}
+
+h2 {
+ color: black;
+}
+
